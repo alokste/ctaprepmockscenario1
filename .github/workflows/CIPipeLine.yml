@@ -24,4 +24,4 @@ jobs:
       - name: "Convert to metadata format"
         run: sfdx force:source:convert --manifest=package/package.xml --outputdir=convert        
       - name: "Run Validation on pull request"
-        run: sfdx force:source:deploy --deploydir=convert --testlevel=RunLocalTests --checkonly -w30
+        run: sfdx force:mdapi:deploy --deploydir=convert --testlevel=RunLocalTests --checkonly -w30
