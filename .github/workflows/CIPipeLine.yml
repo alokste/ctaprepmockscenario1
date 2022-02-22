@@ -13,13 +13,13 @@ jobs:
           sfdx-auth-url: ${{ secrets.AUTH_SECRET }}
       - name: "Install NodeApp and create delta"
         run: |
-        sudo npm install sfdx-git-delta@latest -g
-        git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
-        git fetch --all
-        git checkout -b pr
-        git --no-pager diff --name-status pr origin/develop
-        sgd --to pr --from origin/develop --repo . --output .
-        cat package/package.xml
+          sudo npm install sfdx-git-delta@latest -g
+          git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+          git fetch --all
+          git checkout -b pr
+          git --no-pager diff --name-status pr origin/develop
+          sgd --to pr --from origin/develop --repo . --output .
+          cat package/package.xml
       - name: "Convert to metadata format"
         run: sfdx force:source:convert --manifest=package/package.xml --outputdir=convert        
       - name: "Run Validation on pull request"
