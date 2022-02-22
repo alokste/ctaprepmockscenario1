@@ -1,5 +1,5 @@
 
-For development and deployment of ctamockscenario#1 from Tameem Bahri
+For development and deployment of ctamockscenario#1 from Tameem Bahri's book
 # ====================================
 # Salesforce DX Project: Next Steps
 
