@@ -1,9 +1,8 @@
 name: CIPipeline
 on: 
-  pull_request:
-    types: [opened, reopened]
+  push:
     branches:
-     - 'abc'
+     - 'develop'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,14 +11,13 @@ jobs:
       - uses: sfdx-actions/setup-sfdx@v1
         with:
           sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_cienviron }}
-      - name: "Install NodeApp and create delta"
+      - name: "Install NodeApp and create delta package for changes in Develop compared to Main branch"
         run: |
           sudo npm install sfdx-git-delta@latest -g
           git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
           git fetch --all
-          git checkout -b pr
-          git --no-pager diff --name-status pr origin/develop
-          sgd --to pr --from origin/develop --repo . --output .
+          git --no-pager diff --name-status develop origin/main
+          sgd --to develop --from origin/main --repo . --output .
           cat package/package.xml     
-      - name: "Run Validation on Pull Request"
-        run: sfdx force:source:deploy -x package/package.xml --checkonly --testlevel=RunLocalTests -w30
+      - name: "Deploy changes in Develop branch compared to Main branch"
+        run: sfdx force:source:deploy -x package/package.xml --testlevel=RunLocalTests -w30
