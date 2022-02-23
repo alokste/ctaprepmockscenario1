@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [opened, reopened]
     branches:
-     - 'abc'
+     - 'develop'
 jobs:
   build:
     runs-on: ubuntu-latest
