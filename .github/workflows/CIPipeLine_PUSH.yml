@@ -18,7 +18,7 @@ jobs:
           github.event_name == 'workflow_dispatch' && 
           github.ref_name != 'develop'
         run: |
-         echo "crtiteria not met to run this deployment,hence exiting..."
+         echo "This pipeline supports deployment only from develop branch. Probably the selected branch is not develop ,hence exiting..."
          exit 1
 
 
