@@ -26,7 +26,6 @@ jobs:
 
   DeployChangesForCI:
     needs: ValidateCriteria    
-    if: CRITERIA_MET == {{true}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
