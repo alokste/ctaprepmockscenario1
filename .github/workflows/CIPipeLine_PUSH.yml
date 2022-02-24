@@ -2,9 +2,12 @@ name: CIPipeline
 on: 
   push:
     branches:
-     - 'develop'
+      - 'develop'
+  workflow_dispatch:
+    branches:
+      - 'develop'
 jobs:
-  build:
+  DeployPullRequestForCI:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
