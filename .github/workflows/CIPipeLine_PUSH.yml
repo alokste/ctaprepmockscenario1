@@ -11,13 +11,12 @@ jobs:
     steps:
       - name: "get context values"
         run: |
-         $BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})
          echo "Trigger Event : ${{github.event_name}}"
-         echo "Branch Name : $BRANCH_NAME"
+         echo "Branch Name : $(echo ${GITHUB_REF#refs/heads/})"
       - name: "check pipeline criteria"
         if: |
           github.event_name == 'workflow_dispatch' && 
-          $BRANCH_NAME != 'develop'
+          $(echo ${GITHUB_REF#refs/heads/}) != 'develop'
         run: |
          echo "crtiteria not met to run this deployment,hence exiting..."
          exit 1
