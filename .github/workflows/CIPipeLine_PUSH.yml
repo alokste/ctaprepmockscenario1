@@ -4,21 +4,21 @@ on:
     branches:
       - 'develop'
   workflow_dispatch:
-    inputs:
-      tags:
-        description: 'DEVELOP ONLY'
-env:
-  PIPELINE_EVENT_NAME: 'workflow_dispatch'
-  BRANCH_NAME: 'develop'
 
 jobs:
   CheckPipelineCriteria:
     runs-on: ubuntu-latest
-    steps:      
-      - name: "Check Pipeline criteria met"
-        if: ${{ github.event_name == 'workflow_dispatch' && GITHUB_REF#refs/heads/ != 'develop'}}
+    steps:
+      - name: "get context values"
         run: |
-         echo "Crtiteria not met to run this deployment,hence exiting..."
+         echo "Trigger Event : ${{github.event_name}}"
+         echo "Branch Name : $(echo ${GITHUB_REF#refs/heads/})"
+      - name: "check pipeline criteria"
+        if: |
+          github.event_name == 'workflow_dispatch' && 
+          github.ref_name != 'develop'
+        run: |
+         echo "crtiteria not met to run this deployment,hence exiting..."
          exit 1
 
 
