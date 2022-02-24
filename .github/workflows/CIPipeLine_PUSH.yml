@@ -19,10 +19,13 @@ jobs:
       - name: "Criteria met ?"
         run: echo "::set-env name=CRITERIA_MET::${{true}}"
         if: (PIPELINE_EVENT_NAME == 'workflow_dispatch' && BRANCH_NAME != 'develop')
-        run: echo "::set-env name=CRITERIA_MET::${{false}}"
+        run: |
+          echo "::set-env name=CRITERIA_MET::${{false}}"
+          exit 1
 
 
-  DeployChangesForCI:    
+  DeployChangesForCI:
+    needs: ValidateCriteria    
     if: CRITERIA_MET == {{true}}
     runs-on: ubuntu-latest
     steps:
