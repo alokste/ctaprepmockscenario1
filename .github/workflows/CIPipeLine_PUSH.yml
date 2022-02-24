@@ -1,10 +1,13 @@
-name: CIPipeline
+name: CIPipeline_Deploy
 on: 
   push:
     branches:
-     - 'develop'
+      - 'develop'
+  workflow_dispatch:
+    branches:
+      - 'develop'
 jobs:
-  build:
+  DeployChangesForCI:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
