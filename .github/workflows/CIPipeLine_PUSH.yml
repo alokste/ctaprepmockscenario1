@@ -14,9 +14,10 @@ env:
 jobs:
   CheckPipelineCriteria:
     runs-on: ubuntu-latest
-    steps:      
+    steps:
+      - run: echo "env.BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})"   
       - name: "Check Pipeline criteria met"
-        if: ${{ github.event_name == 'workflow_dispatch' && GITHUB_REF#refs/heads/ != 'develop'}}
+        if: ${{ github.event_name == 'workflow_dispatch' && env.BRANCH_NAME != 'develop'}}
         run: |
          echo "Crtiteria not met to run this deployment,hence exiting..."
          exit 1
