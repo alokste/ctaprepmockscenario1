@@ -12,7 +12,7 @@ jobs:
       - name: "get context values"
         run: |
          echo "Trigger Event : ${{github.event_name}}"
-         echo "Branch Name : $(echo ${GITHUB_REF#refs/heads/})"
+         echo "Branch Name : ${{github.ref_name}}"
       - name: "check pipeline criteria"
         if: |
           github.event_name == 'workflow_dispatch' && 
