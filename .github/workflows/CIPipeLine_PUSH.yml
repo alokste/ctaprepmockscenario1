@@ -21,7 +21,7 @@ jobs:
         run: echo "env.PIPELINE_EVENT_NAME=$(echo ${github.event_name})"
       - name: "Is Criteria Met ?"
         run: |         
-         if: (env.PIPELINE_EVENT_NAME == 'workflow_dispatch' && env.BRANCH_NAME != 'develop')
+         if: ${{env.PIPELINE_EVENT_NAME == 'workflow_dispatch' && env.BRANCH_NAME != 'develop'}}
          echo "Crtiteria not met to run this deployment,hence exiting..."
          exit 1
 
