@@ -16,7 +16,7 @@ jobs:
       - name: "check pipeline criteria"
         if: |
           github.event_name == 'workflow_dispatch' && 
-          $(echo ${GITHUB_REF#refs/heads/}) != 'develop'
+          GITHUB_REF#refs/heads/ != 'develop'
         run: |
          echo "crtiteria not met to run this deployment,hence exiting..."
          exit 1
