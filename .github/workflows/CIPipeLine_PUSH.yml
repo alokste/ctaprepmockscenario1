@@ -17,11 +17,11 @@ jobs:
       - name: "Get the event which triggered the pipeline into PIPELINE_EVENT_NAME variable"
         run: echo "::set-env name=PIPELINE_EVENT_NAME::$(echo ${github.event_name})"
       - name: "Criteria met ?"
-        run: echo "::set-env name=CRITERIA_MET::${{true}}"
-        if: (PIPELINE_EVENT_NAME == 'workflow_dispatch' && BRANCH_NAME != 'develop')
         run: |
-          echo "::set-env name=CRITERIA_MET::${{false}}"
-          exit 1
+         echo "::set-env name=CRITERIA_MET::${{true}}"        
+         if: (PIPELINE_EVENT_NAME == 'workflow_dispatch' && BRANCH_NAME != 'develop')
+         echo "::set-env name=CRITERIA_MET::${{false}}"
+         exit 1
 
 
   DeployChangesForCI:
