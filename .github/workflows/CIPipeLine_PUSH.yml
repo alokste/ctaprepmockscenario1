@@ -1,4 +1,4 @@
-name: CIPipeline
+name: CIPipeline_Deploy
 on: 
   push:
     branches:
@@ -7,7 +7,7 @@ on:
     branches:
       - 'develop'
 jobs:
-  DeployPullRequestForCI:
+  DeployChangesForCI:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
