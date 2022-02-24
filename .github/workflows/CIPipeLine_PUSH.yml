@@ -4,8 +4,6 @@ on:
     branches:
       - 'develop'
   workflow_dispatch:
-env:
-  BRANCH_NAME: 'dummy'
 
 jobs:
   CheckPipelineCriteria:
@@ -13,12 +11,13 @@ jobs:
     steps:
       - name: "get context values"
         run: |
-         echo "env.BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})"
+         $BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})
          echo "Trigger Event : ${{github.event_name}}"
+         echo "Branch Name : $BRANCH_NAME"
       - name: "check pipeline criteria"
         if: |
           github.event_name == 'workflow_dispatch' && 
-          env.BRANCH_NAME != 'develop'
+          $BRANCH_NAME != 'develop'
         run: |
          echo "crtiteria not met to run this deployment,hence exiting..."
          exit 1
