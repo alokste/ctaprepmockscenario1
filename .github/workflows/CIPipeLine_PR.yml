@@ -8,6 +8,7 @@ jobs:
   ValidatePullRequestForCI:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "Pipeline triggered by event :" ${{ github.event_name }} 
       - uses: actions/checkout@v2
       - uses: sfdx-actions/setup-sfdx@v1
         with:
