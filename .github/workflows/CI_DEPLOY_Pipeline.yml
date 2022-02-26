@@ -1,0 +1,52 @@
+name: CI_DEPLOY_Pipeline
+on: 
+  push:
+    branches:
+      - 'develop'
+  workflow_dispatch:
+
+jobs:
+  CheckPipelineCriteria:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "getting pipeline context values..."
+        run: |
+          echo "pipeline was triggered by event :" ${{ github.event_name }} 
+          echo "pipeline is based on remote branch :" ${{github.ref_name}} 
+      - name: "checking if pipeline criteria is met ..."
+        if: |
+          github.event_name == 'workflow_dispatch' && 
+          github.ref_name != 'develop'
+        run: |
+         echo "This pipeline supports deployment only from develop branch. Probably the selected branch is not develop ,hence exiting..."
+         exit 1
+
+
+  DeployChanges:
+    needs: CheckPipelineCriteria    
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: sfdx-actions/setup-sfdx@v1
+        with:
+          sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_cienviron }}
+      - name: "installing nodeapp and creating delta package for changes in Develop compared to Main branch..."
+        run: |
+          sudo npm install sfdx-git-delta@latest -g
+          git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+          git fetch --all
+          git --no-pager diff --name-status develop origin/main
+          sgd --to develop --from origin/main --repo . --output .
+          cat package/package.xml
+
+      - name: "validating changes in Develop branch compared to Main branch with full test run against the CI environment..."
+        run: |
+          VALIDATION_JOB=$(sfdx force:source:deploy -x package/package.xml --testlevel=RunLocalTests --checkonly --wait 10)
+          echo "$VALIDATION_JOB"
+          echo "::set-output name=VALIDATION_JOB_ID::$VALIDATION_JOB"
+        id: validate-id
+      - name: "deploying changes in Develop branch compared to Main branch in the CI environment with no test run..."
+        run: |
+          sfdx force:source:deploy -x package/package.xml --testlevel=NoTestRun --wait 10
+          # sfdx force:source:deploy -x package/package.xml --testlevel=NoTestRun --wait 10
+          # echo "quick deploying the changes validated in ${{steps.validate-id.outputs.VALIDATION_JOB_ID}}"          
