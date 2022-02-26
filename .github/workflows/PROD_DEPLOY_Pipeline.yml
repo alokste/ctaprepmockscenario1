@@ -46,7 +46,7 @@ jobs:
     needs: ValidateChanges    
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
       - uses: sfdx-actions/setup-sfdx@v1
         with:
           sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_PRODENVIRON }}
