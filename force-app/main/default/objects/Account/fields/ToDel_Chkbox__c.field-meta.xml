@@ -3,7 +3,7 @@
     <fullName>ToDel_Chkbox__c</fullName>
     <defaultValue>false</defaultValue>
     <externalId>false</externalId>
-    <label>ToDel_Chkbox_abcd</label>
+    <label>ToDel_Chkbox_1</label>
     <trackFeedHistory>false</trackFeedHistory>
     <type>Checkbox</type>
 </CustomField>
