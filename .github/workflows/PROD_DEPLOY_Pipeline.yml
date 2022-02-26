@@ -35,7 +35,7 @@ jobs:
           sudo npm install sfdx-git-delta@latest -g
           git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
           git fetch --all
-          git --no-pager diff --name-status HEAD^..HEAD
+          git --no-pager diff --name-status HEAD^
           sgd --to "HEAD" --from "HEAD^" --repo . --output .
           cat package/package.xml
       - name: "validating changes in Main branch with full test run against the Production environment..."
