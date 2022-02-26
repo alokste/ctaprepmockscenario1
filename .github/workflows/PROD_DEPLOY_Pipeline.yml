@@ -36,6 +36,7 @@ jobs:
           git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
           git fetch --all
           git branch --all
+          echo "prev_commit_sha=$(git rev-parse HEAD~1)"
           sgd --to "HEAD" --from "HEAD^" --repo . --output .
           cat package/package.xml
       - name: "validating changes in Main branch with full test run against the Production environment..."
