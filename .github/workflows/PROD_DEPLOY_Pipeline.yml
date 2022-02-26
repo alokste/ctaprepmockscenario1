@@ -1,4 +1,4 @@
-name: MAIN_DEPLOY_Pipeline
+name: PROD_DEPLOY_Pipeline
 on: 
   push:
     branches:
@@ -35,8 +35,8 @@ jobs:
           sudo npm install sfdx-git-delta@latest -g
           git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
           git fetch --all
-          git --no-pager diff --name-status head head~1
-          sgd --to head --from head~1 --repo . --output .
+          git --no-pager diff --name-status origin/main/head origin/main/head~1
+          sgd --to origin/main/head --from origin/main/head~1 --repo . --output .
           cat package/package.xml
       - name: "validating changes in Main branch with full test run against the Production environment..."
         run: sfdx force:source:deploy -x package/package.xml --testlevel=RunLocalTests --checkonly --wait 30
