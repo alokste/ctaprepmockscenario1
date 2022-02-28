@@ -1,0 +1,27 @@
+name: MAIN_PullRequestValidation_PipeLine
+on: 
+  pull_request:
+    types: [opened, reopened]
+    branches:
+     - 'main'
+jobs:
+  ValidatePullRequest:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "pipeline was triggered by event :" ${{ github.event_name }} 
+      - run: echo "pipeline is based on remote branch :" ${{github.ref_name}} 
+      - uses: actions/checkout@v2
+      - uses: sfdx-actions/setup-sfdx@v1
+        with:
+          sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_PRODENVIRON }}
+      - name: "installing nodeapp and creating delta package for validation..."
+        run: |
+          sudo npm install sfdx-git-delta@latest -g
+          git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+          git fetch --all
+          git checkout -b pr
+          git --no-pager diff --name-status pr origin/main
+          sgd --to pr --from main --repo . --output .
+          cat package/package.xml     
+      - name: "running validation of pull request against main environment with all test run..."
+        run: sfdx force:source:deploy -x package/package.xml --checkonly --testlevel=RunLocalTests -w 30
