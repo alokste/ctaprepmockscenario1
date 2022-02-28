@@ -1,0 +1,65 @@
+name: PROD_DEPLOY_Pipeline
+on: 
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+    inputs:
+      before_commit_sha:
+        description: 'BEFORE COMMIT SHA'     
+        required: false
+        default: ''
+
+jobs:
+  CheckPipelineCriteria:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "getting pipeline context values..."
+        run: |
+          echo "pipeline was triggered by event :" ${{ github.event_name }} 
+          echo "pipeline is based on remote branch :" ${{github.ref_name}}      
+      - name: "checking if pipeline criteria is met ..."
+        if: |
+          github.event_name == 'workflow_dispatch' && 
+          github.ref_name != 'main'
+        run: |
+         echo "This pipeline supports deployment only from main branch. Probably the selected branch is not main ,hence exiting..."
+         exit 1
+
+
+  DeployChanges:
+    needs: CheckPipelineCriteria    
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: sfdx-actions/setup-sfdx@v1
+        with:
+          sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_PRODENVIRON }}
+      - name: "installing nodeapp and creating delta package for changes in Main branch..."
+        env:
+          prev_commit_sha: ${{ github.event.inputs.before_commit_sha}}
+        run: |
+          sudo npm install sfdx-git-delta@latest -g
+          git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+          git fetch --all          
+          if [ "$prev_commit_sha" == "" ] ;then            
+            sgd --to "HEAD" --from "HEAD~1" --repo . --output .
+          else
+            sgd --to "HEAD" --from "$prev_commit_sha" --repo . --output .
+          fi
+          cat package/package.xml
+          echo "--- destructiveChanges.xml generated with deleted metadata ---"
+          cat destructiveChanges/destructiveChanges.xml
+      - name: "validating changes in Main branch with full test run against the Production environment..."
+        run: |
+          sfdx force:source:deploy -x package/package.xml --testlevel=RunLocalTests --checkonly --wait 30
+          echo "validating the deletion of removed metadata..."
+          sfdx force:mdapi:deploy -d destructiveChanges --ignorewarnings --testlevel=RunLocalTests --checkonly --wait -1
+      - name: "deploying changes in Main branch with all test run against the Production environment..."
+        run: |
+          sfdx force:source:deploy -x package/package.xml --testlevel=NoTestRun --wait 30 
+          echo "deleting removed metadata..."
+          sfdx force:mdapi:deploy -d destructiveChanges --ignorewarnings --testlevel=NoTestRun --wait -1          
+  
