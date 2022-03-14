@@ -28,36 +28,40 @@ jobs:
 
 
   DeployChanges:
-    needs: CheckPipelineCriteria    
+    needs: CheckPipelineCriteria   
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+       # Setup the runner environment
+      - name: Checkout source
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-      - uses: sfdx-actions/setup-sfdx@v1
+          fetch-depth: 0 
+      - name: setup the runner
+        uses: ./.github/actions/setup-sfdx-runner
         with:
-          sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_PRODENVIRON }}
-      - name: "installing nodeapp and creating delta package for changes in Main branch..."
+          sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_PRODENVIRON }}      
+      
+      # Prepare , validate and deploy the delta package
+      - name: "create delta package for changes in Main branch..."
         env:
           prev_commit_sha: ${{ github.event.inputs.before_commit_sha}}
-        run: |
-          sudo npm install sfdx-git-delta@latest -g
+        run: |          
           git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
           git fetch --all          
           if [ "$prev_commit_sha" == "" ] ;then            
-            sgd --to "HEAD" --from "HEAD~1" --repo . --output .
+            sfdx sgd:source:delta --to "HEAD" --from "HEAD~1" --source force-app --repo . --output .
           else
-            sgd --to "HEAD" --from "$prev_commit_sha" --repo . --output .
+            sfdx sgd:source:delta --to "HEAD" --from "$prev_commit_sha" --source force-app --repo . --output .
           fi
           cat package/package.xml
           echo "--- destructiveChanges.xml generated with deleted metadata ---"
           cat destructiveChanges/destructiveChanges.xml
-      - name: "validating changes in Main branch with full test run against the Production environment..."
+      - name: "validate changes in Main branch with full test run against the Production environment..."
         run: |
           sfdx force:source:deploy -x package/package.xml --testlevel=RunLocalTests --checkonly --wait 30
           echo "validating the deletion of removed metadata..."
           sfdx force:mdapi:deploy -d destructiveChanges --ignorewarnings --testlevel=RunLocalTests --checkonly --wait -1
-      - name: "deploying changes in Main branch with all test run against the Production environment..."
+      - name: "deploy changes in Main branch with all test run against the Production environment..."
         run: |
           sfdx force:source:deploy -x package/package.xml --testlevel=NoTestRun --wait 30 
           echo "deleting removed metadata..."
