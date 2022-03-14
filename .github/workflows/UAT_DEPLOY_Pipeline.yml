@@ -23,17 +23,23 @@ jobs:
     needs: CheckPipelineCriteria    
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: sfdx-actions/setup-sfdx@v1
+       # Setup the runner environment
+      - name: Checkout source
+        uses: actions/checkout@v2
         with:
-          sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_UATENVIRON }}
-      - name: "installing nodeapp and creating delta package for changes in Release branch compared to Main branch..."
-        run: |
-          sudo npm install sfdx-git-delta@latest -g
+          fetch-depth: 0 
+      - name: setup the runner
+        uses: ./.github/actions/setup-sfdx-runner
+        with:
+          sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_UATENVIRON }}      
+      
+      # Prepare , validate and deploy the delta package
+      - name: "creating delta package for changes in Release branch compared to Main branch..."
+        run: |          
           git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
           git fetch --all
           git --no-pager diff --name-status release origin/main
-          sgd --to release --from origin/main --repo . --output .
+          sfdx sgd:source:delta --to release --from origin/main --source force-app --repo . --output .
           cat package/package.xml
           echo "--- destructiveChanges.xml generated with deleted metadata ---"
           cat destructiveChanges/destructiveChanges.xml     

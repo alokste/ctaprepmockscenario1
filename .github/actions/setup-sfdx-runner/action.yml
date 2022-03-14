@@ -1,0 +1,24 @@
+name: 'Setup the sfdx CLI runner environment'
+author: Alok Kumar
+description: 'This action sets the runner environment for Salesforce SFDX deployments'
+inputs:
+  sfdx-auth-url:
+    description: Authorize a Salesforce org using an SFDX auth URL
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Setup nodejs
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16.x'
+    - name: Install SFDX CLI
+      run: npm install --global sfdx-cli
+      shell: bash
+    - name: Install SGD  
+      run : echo 'y' | sfdx plugins:install sfdx-git-delta 
+      shell: bash   
+    - name: authorize the default org
+      uses: ./.github/actions/setup-sfdx-authorize
+      with:
+        sfdx-auth-url: ${{ inputs.sfdx-auth-url }}

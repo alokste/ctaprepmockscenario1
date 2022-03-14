@@ -6,22 +6,27 @@ on:
      - 'main'
 jobs:
   ValidatePullRequest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    
     steps:
       - run: echo "pipeline was triggered by event :" ${{ github.event_name }} 
       - run: echo "pipeline is based on remote branch :" ${{github.ref_name}} 
-      - uses: actions/checkout@v2
-      - uses: sfdx-actions/setup-sfdx@v1
+      # Setup the runner environment
+      - name: checkout source
+        uses: actions/checkout@v2
         with:
-          sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_PRODENVIRON }}
-      - name: "installing nodeapp and creating delta package for validation..."
-        run: |
-          sudo npm install sfdx-git-delta@latest -g
+          fetch-depth: 0 
+      - name: setup the runner
+        uses: ./.github/actions/setup-sfdx-runner
+        with:
+          sfdx-auth-url: ${{ secrets.AUTH_SECRET_SFORG_PRODENVIRON }}  
+    # Prepare , validate and deploy the delta package
+      - name: "creating delta package for validation..."
+        run: |          
           git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
           git fetch --all
           git checkout -b pr
           git --no-pager diff --name-status pr origin/main
-          sgd --to pr --from main --repo . --output .
+          sfdx sgd:source:delta --to pr --from main --source force-app --repo . --output .
           cat package/package.xml     
       - name: "running validation of pull request against main environment with all test run..."
         run: sfdx force:source:deploy -x package/package.xml --checkonly --testlevel=RunLocalTests -w 30
